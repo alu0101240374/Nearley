@@ -1,0 +1,16 @@
+{
+  "name": "nearly",
+  "version": "1.0.0",
+  "description": "",
+  "main": "grammar.js",
+  "scripts": {
+    "test": "npm run compile && node parse.js",
+    "compile": "nearleyc egg.ne -o egg.js"
+  },
+  "author": "Gabriel García Jaubert <alu0101240374@ull.edu.es>",
+  "license": "ISC",
+  "dependencies": {
+    "nearley": "^2.20.1",
+    "nearly": "^1.8.1"
+  }
+}
