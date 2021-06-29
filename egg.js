@@ -2,6 +2,12 @@
 // http://github.com/Hardmath123/nearley
 (function () {
 function id(x) { return x[0]; }
+
+const nm = require('nearley-moo');
+const tokens = require('./egg-tokens.js');
+
+nm(tokens);
+
 var grammar = {
     Lexer: undefined,
     ParserRules: [
@@ -22,12 +28,13 @@ var grammar = {
                     },
     {"name": "apply", "symbols": [], "postprocess": () => { return null }},
     {"name": "apply$ebnf$1", "symbols": []},
-    {"name": "apply$ebnf$1$subexpression$1", "symbols": ["expression", {"literal":","}]},
+    {"name": "apply$ebnf$1$subexpression$1", "symbols": ["expression", comma]},
     {"name": "apply$ebnf$1", "symbols": ["apply$ebnf$1", "apply$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "apply$ebnf$2", "symbols": ["expression"], "postprocess": id},
     {"name": "apply$ebnf$2", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "apply", "symbols": [{"literal":"("}, "apply$ebnf$1", "apply$ebnf$2", {"literal":")"}, "apply"], "postprocess": 
+    {"name": "apply", "symbols": [LP, "apply$ebnf$1", "apply$ebnf$2", RP, "apply"], "postprocess": 
         function (data) {
+            console.log('apply')
           let result = [];
           data[1].forEach((element) => {
             element.splice(1, 3);
@@ -37,30 +44,23 @@ var grammar = {
           return result;
         }
                     },
-    {"name": "STRING", "symbols": [{"literal":"\""}, "characters", {"literal":"\""}], "postprocess": 
+    {"name": "STRING", "symbols": [string], "postprocess": 
         function (data) {
-          return `{"type": "value", "value": "${data[1].join("")}"}`;
+          return `{"type": "value", "value": ${data[0]}}`;
         }
         },
-    {"name": "characters$ebnf$1", "symbols": ["character"]},
-    {"name": "characters$ebnf$1", "symbols": ["characters$ebnf$1", "character"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "characters", "symbols": ["characters$ebnf$1"], "postprocess": id},
-    {"name": "character", "symbols": [/[^\"]/], "postprocess": id},
-    {"name": "NUMBER$ebnf$1", "symbols": [/[0-9]/]},
-    {"name": "NUMBER$ebnf$1", "symbols": ["NUMBER$ebnf$1", /[0-9]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "NUMBER$ebnf$1", "symbols": [number]},
+    {"name": "NUMBER$ebnf$1", "symbols": ["NUMBER$ebnf$1", number], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "NUMBER", "symbols": ["NUMBER$ebnf$1"], "postprocess": 
         function (data) {
           return `{"type: "value", "value": "${data[0].join("")}"}`;
         }
         },
-    {"name": "WORD$ebnf$1", "symbols": []},
-    {"name": "WORD$ebnf$1", "symbols": ["WORD$ebnf$1", /[^\s(){},"\:.\]\[]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "WORD", "symbols": ["letter", "WORD$ebnf$1"], "postprocess": 
+    {"name": "WORD", "symbols": [word], "postprocess": 
         function (data) {
-          return `{"type": "word", "value": "${data[0] + data[1].join("")}"}`
+          return `{"type": "word", "value": "${data[0]}"}`
         }
-        },
-    {"name": "letter", "symbols": [/[a-zA-Z]/], "postprocess": id}
+        }
 ]
   , ParserStart: "expression"
 }

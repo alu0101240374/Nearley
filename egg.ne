@@ -1,5 +1,13 @@
 @builtin "whitespace.ne"
 
+@{%
+const nm = require('nearley-moo');
+const tokens = require('./egg-tokens.js');
+
+nm(tokens);
+
+%}
+
 expression -> STRING
             | NUMBER
             | WORD apply {%
@@ -10,8 +18,9 @@ expression -> STRING
             %}
 
 apply      -> null {% () => { return null } %}
-            | "(" (expression "," ):* expression:? ")" apply {%
+            | %LP (expression %comma):* expression:? %RP apply {%
               function (data) {
+                  console.log('apply')
                 let result = [];
                 data[1].forEach((element) => {
                   element.splice(1, 3);
@@ -22,26 +31,20 @@ apply      -> null {% () => { return null } %}
               }
             %}
 
-STRING -> "\"" characters "\"" {%
+STRING -> %string {%
   function (data) {
-    return `{"type": "value", "value": "${data[1].join("")}"}`;
+    return `{"type": "value", "value": ${data[0]}}`;
   }
 %}
 
-characters -> character:+ {% id %}
-
-character -> [^\"] {% id %}
-
-NUMBER -> [0-9]:+ {%
+NUMBER -> %number:+ {%
   function (data) {
     return `{"type: "value", "value": "${data[0].join("")}"}`;
   }
 %}
 
-WORD -> letter [^\s(){},"\:.\]\[]:* {%
+WORD -> %word {%
   function (data) {
-    return `{"type": "word", "value": "${data[0] + data[1].join("")}"}`
+    return `{"type": "word", "value": "${data[0]}"}`
   }
 %}
-
-letter -> [a-zA-Z] {% id %}

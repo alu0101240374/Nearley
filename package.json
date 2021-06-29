@@ -10,7 +10,9 @@
   "author": "Gabriel García Jaubert <alu0101240374@ull.edu.es>",
   "license": "ISC",
   "dependencies": {
+    "@ull-esit-pl-2021/egg-alu0101240374": "^1.8.0",
     "nearley": "^2.20.1",
+    "nearley-moo": "^1.0.2",
     "nearly": "^1.8.1"
   }
 }
