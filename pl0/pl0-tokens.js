@@ -28,7 +28,7 @@ const div = /\//;
 const lp = /\(/;
 const rp = /\)/;
 const number = /[0-9]+/;
-const ident = /[a-z](?:[^()\[\]])*/;
+const ident = /[a-z](?:[^()\[\];,.])*/;
 const ws = /[\r\n\d\s ]+/;
 
 const tokens = {
