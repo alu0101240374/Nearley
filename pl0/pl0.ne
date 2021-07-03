@@ -24,10 +24,28 @@ statement -> null
 condition -> %odd expression
           | expression (%equal|%hashtag|%minor|%minoreq|%greater|%greatereq) expression
 
-expression -> (%add|%substract):? term ((%add|%substract):? term):*
+expression -> (%add|%substract):? term ((%add|%substract):? term):* {% (d) => {
+    let currentOperation = "";
+    if (typeof d[0] === 'undefined')
+      currentOperation = d[1]};
+    else {
+      currentOperation = `{"type": value, "value": ${d[1]}}`;
+    }
+    let i = 0;
+    while (d[2].length > i) {
+      let tmp = `{"type": apply, "op": ${d[2][i][0]}, "args": [${currentOperation}, ]}`;
+    }
+  };
+%}
 
-term -> factor ((%mul|%div) factor):* {% (d) => return `{"type": apply, "op": ${d[1]}, "args": [${d[0]}, ${d[2]}]}`%}
+term -> factor ((%mul|%div) factor):* {% (d) => {
+  if (typeof d[1] === 'undefined')
+    return d[0];
+  
+  return `{"type": apply, "op": ${d[1][0]}, "args": [${d[0]}, ${d[1][1]}]}`
+  }  
+%}
 
-factor -> %ident {% (d) => return `{"type": word, "value": ${d[0]}}`; %}
+factor -> %ident {% (d) => return `{"type": word, "name": ${d[0]}}`; %}
         | %number {% (d) => return `{"type": value, "value": ${d[0]}}`; %}
         | %lp expression %rp {% (d) => return d[1]; %}
