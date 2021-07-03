@@ -4,8 +4,8 @@
   "description": "",
   "main": "grammar.js",
   "scripts": {
-    "test": "npm run compile && node ./json/parse-json.js",
-    "compile": "nearleyc ./json/json.ne -o ./json/json.js"
+    "test": "npm run compile && node ./pl0/parse-pl0.js",
+    "compile": "nearleyc ./pl0/pl0.ne -o ./pl0/pl0.js"
   },
   "author": "Gabriel García Jaubert <alu0101240374@ull.edu.es>",
   "license": "ISC",
