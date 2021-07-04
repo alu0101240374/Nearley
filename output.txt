@@ -1,0 +1,3 @@
+[
+   "{\"type\": apply, \"op\": {\"type\": word, \"name\": do}, args: [{\"type\": apply, \"op\": {\"type\": word, \"name\": define}, args: [{\"type\": word, \"name\": x}, {\"type\": value, \"value\": 0}]}, {\"type\": apply, \"op\": {\"type\": word, \"name\": define}, args: [{\"type\": word, \"name\": squ}, {\"type\": value, \"value\": 0}]}{\"type\": apply, \"op\": {\"type\": word, \"name\": fun}, args: [{\"type\": word, \"name\": square}, {\"type\": apply, \"op\": {\"type\": word, \"name\": do}, args: [{\"type\": apply, \"op\": {\"type\": word, \"name\": define}, args: [{\"type\": word, \"name\": squ}, {\"type\": value, \"value\": {\"type\": apply, \"op\": *,{\"type\": word, \"name\": x}, \"args\": [{\"type\": word, \"name\": x}, undefined]}}]}]}]}]}"
+]

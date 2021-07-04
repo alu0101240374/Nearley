@@ -18,10 +18,11 @@ block -> null
           (d) => {
             let nodes = '';
             if (d[0]) {
-              console.log('d0')
               nodes += `{"type": apply, "op": {"type": word, "name": defineConst}, args: [${d[0][1]}, ${d[0][3]}]}`;
-              for (let i = 0; i < d[0][4].length; i++) {
-                nodes += `, {"type": apply, "op": {"type": word, "name": defineConst}, args: [${d[0][4][i][1]}, ${d[0][4][i][3]}]}`;
+              if (typeof d[0][4] !== 'undefined') {
+                for (let i = 0; i < d[0][4].length; i++) {
+                  nodes += `, {"type": apply, "op": {"type": word, "name": defineConst}, args: [${d[0][4][i][1]}, ${d[0][4][i][3]}]}`;
+                }
               }
             }
             if (d[1]) {
@@ -33,7 +34,6 @@ block -> null
               }
             }
             if (typeof d[2] !== 'undefined' && d[2].length > 0) {
-              console.log('d2')
               for (let i = 0; i < d[2].length; i++) {
                 nodes += `{"type": apply, "op": {"type": word, "name": fun}, args: [${d[2][i][1]}, ${d[2][i][3]}]}`;
               }
@@ -48,7 +48,6 @@ block -> null
 statement -> null {% () => { return null } %}
           | IDENT %semieq expression {%
             (d) => {
-              console.log(d);
               return `{"type": apply, "op": {"type": word, "name": define}, args: [${d[0]}, ${d[2]}]}`;
             }
           %}
@@ -65,13 +64,15 @@ statement -> null {% () => { return null } %}
           %}
           | %begin statement (%semicolon statement):* %end {%
             (d) => {
-              console.log('begin')
               let args = [];
               args.push(d[1]);
-              for (let i = 0; i < d[2][1].length; i++) {
-                args.push(d[2][1][i]);
+              if (typeof d[2] !== 'undefined') {
+                for (let i = 0; i < d[2].length; i++) {
+                  if (d[2][i][1]) args.push(d[2][i][1]);
+                }
               }
-              return `{"type": apply, "op": {"type": word, "name": do}, args: ${args}}`;
+              //console.log(args)
+              return `{"type": apply, "op": {"type": word, "name": weboooo}, args: [${args}]}`;
             }
           %}
           | %ifToken condition %then statement {%
@@ -81,6 +82,7 @@ statement -> null {% () => { return null } %}
           %}
           | %whileToken condition %doToken statement {%
             (d) => {
+              console.log('hola')
               return `{"type": apply, "op": {"type": word, "name": while}, args: [${d[1]}, ${d[3]}]}`;
             }
           %}
@@ -94,28 +96,32 @@ condition -> %odd expression
 
 expression -> (%add|%substract):? term ((%add|%substract):? term):* {% (d) => {
     let currentOperation = "";
-    console.log('expression')
-    if (typeof d[0] === 'undefined') //significa que no es un número negativo o positivo
+    if (!d[0]) {//significa que no es un número negativo o positivo
       currentOperation = d[1];
-    else {
+    } else {
       currentOperation = `{"type": value, "value": ${d[1]}}`;
     }
     let i = 0;
-    console.log('expression')
-    while (typeof d[2] !== 'undefined' && d[2].length > i) { //realizamos todas las operaciones aritmeticas
+    while (typeof d[2] !== 'undefined' && i < d[2].length) { //realizamos todas las operaciones aritmeticas
       let tmp = `{"type": apply, "op": ${d[2][i][0]}, "args": [${currentOperation}, ${d[2][i][1]}]}`;
       currentOperation = tmp;
+      i++;
     }
     return currentOperation;
   }
 %}
 
 term -> factor ((%mul|%div) factor):* {% (d) => {
-  console.log('term')
   if (typeof d[1] === 'undefined')
     return d[0];
-  
-  return `{"type": apply, "op": ${d[1][0]}, "args": [${d[0]}, ${d[1][1]}]}`
+  let i = 0;
+  let currentOperation = d[0];
+  while (typeof d[1] !== 'undefined' && i < d[1].length) { //realizamos todas las operaciones aritmeticas
+    let tmp = `{"type": apply, "op": {"type": word, "name": ${d[1][i][0][0].value}}, "args": [${currentOperation}, ${d[1][i][1]}]}`;
+    currentOperation = tmp;
+    i++;
+  }
+  return currentOperation;
   }  
 %}
 
