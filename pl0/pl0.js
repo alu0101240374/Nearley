@@ -12,7 +12,6 @@ var grammar = {
     ParserRules: [
     {"name": "program", "symbols": ["block", dot], "postprocess": 
         (d) => {
-          console.log('program')
           return `{"type": apply, "op": {"type": word, "name": do}, args: [${d[0]}]}`;
         }
         },
@@ -33,7 +32,6 @@ var grammar = {
     {"name": "block$ebnf$3", "symbols": ["block$ebnf$3", "block$ebnf$3$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "block", "symbols": ["block$ebnf$1", "block$ebnf$2", "block$ebnf$3", "statement"], "postprocess": 
         (d) => {
-          console.log('block')
           let nodes = '';
           if (d[0]) {
             console.log('d0')
@@ -62,13 +60,14 @@ var grammar = {
           return nodes;
         }
                 },
-    {"name": "statement", "symbols": []},
-    {"name": "statement", "symbols": [ident, semieq, "expression"], "postprocess": 
+    {"name": "statement", "symbols": [], "postprocess": () => { return null }},
+    {"name": "statement", "symbols": ["IDENT", semieq, "expression"], "postprocess": 
         (d) => {
+          console.log(d);
           return `{"type": apply, "op": {"type": word, "name": define}, args: [${d[0]}, ${d[2]}]}`;
         }
                   },
-    {"name": "statement", "symbols": [call, ident], "postprocess": 
+    {"name": "statement", "symbols": [call, "IDENT"], "postprocess": 
         (d) => {
           return `{"type": apply, "op": {"type": word, "name": ${d[1]}}, args: []}`;
         }
@@ -128,6 +127,7 @@ var grammar = {
     {"name": "expression$ebnf$2", "symbols": ["expression$ebnf$2", "expression$ebnf$2$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "expression", "symbols": ["expression$ebnf$1", "term", "expression$ebnf$2"], "postprocess":  (d) => {
           let currentOperation = "";
+          console.log('expression')
           if (typeof d[0] === 'undefined') //significa que no es un número negativo o positivo
             currentOperation = d[1];
           else {
@@ -148,6 +148,7 @@ var grammar = {
     {"name": "term$ebnf$1$subexpression$1", "symbols": ["term$ebnf$1$subexpression$1$subexpression$1", "factor"]},
     {"name": "term$ebnf$1", "symbols": ["term$ebnf$1", "term$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "term", "symbols": ["factor", "term$ebnf$1"], "postprocess":  (d) => {
+        console.log('term')
         if (typeof d[1] === 'undefined')
           return d[0];
         

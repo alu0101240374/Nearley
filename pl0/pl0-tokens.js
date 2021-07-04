@@ -1,10 +1,10 @@
-const dot = /\./;
+const dot = /[.]/;
 const constToken = /const/;
 const comma = /,/;
-const semicolon = /;/;
+const semicolon = /[;]/;
 const varToken = /var/;
 const procedure = /procedure/;
-const semieq = /[:=]/;
+const semieq = /\:\=/;
 const call = /call/;
 const questionmark = /\?/;
 const exclamation = /\!/;
@@ -28,10 +28,11 @@ const div = /\//;
 const lp = /\(/;
 const rp = /\)/;
 const number = /[0-9]+/;
-const ident = /[a-z](?:[^()\[\];,.])*/;
-const ws = /[\r\n\d\s ]+/;
+const ident = /[a-z](?:[^()\[\];:=,.\s])*/;
+const ws = /[\r\n\s ]+/;
 
 const tokens = {
+  ws: {match: ws, lineBreaks: true},
   dot,
   constToken,
   comma,
@@ -62,8 +63,7 @@ const tokens = {
   lp,
   rp,
   number,
-  ident,
-  ws: {match: ws, lineBreaks: true}
+  ident
 }
 
 module.exports = tokens;

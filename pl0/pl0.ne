@@ -7,7 +7,6 @@ nm(tokens);
 
 program -> block %dot {%
   (d) => {
-    console.log('program')
     return `{"type": apply, "op": {"type": word, "name": do}, args: [${d[0]}]}`;
   }
 %}
@@ -17,7 +16,6 @@ block -> null
         (%varToken IDENT (%comma IDENT):* %semicolon):?
         (%procedure IDENT %semicolon block %semicolon):* statement {%
           (d) => {
-            console.log('block')
             let nodes = '';
             if (d[0]) {
               console.log('d0')
@@ -47,13 +45,14 @@ block -> null
           }
         %}
 
-statement -> null
-          | %ident %semieq expression {%
+statement -> null {% () => { return null } %}
+          | IDENT %semieq expression {%
             (d) => {
+              console.log(d);
               return `{"type": apply, "op": {"type": word, "name": define}, args: [${d[0]}, ${d[2]}]}`;
             }
           %}
-          | %call %ident {%
+          | %call IDENT {%
             (d) => {
               return `{"type": apply, "op": {"type": word, "name": ${d[1]}}, args: []}`;
             }
@@ -95,6 +94,7 @@ condition -> %odd expression
 
 expression -> (%add|%substract):? term ((%add|%substract):? term):* {% (d) => {
     let currentOperation = "";
+    console.log('expression')
     if (typeof d[0] === 'undefined') //significa que no es un número negativo o positivo
       currentOperation = d[1];
     else {
@@ -111,6 +111,7 @@ expression -> (%add|%substract):? term ((%add|%substract):? term):* {% (d) => {
 %}
 
 term -> factor ((%mul|%div) factor):* {% (d) => {
+  console.log('term')
   if (typeof d[1] === 'undefined')
     return d[0];
   
