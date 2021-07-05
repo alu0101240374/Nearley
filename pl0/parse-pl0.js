@@ -17,6 +17,7 @@ try {
                   squ:= x * x
                 end;
                 begin
+                  call square;
                   x := 1;
                   while x <= 10 do
                   begin
