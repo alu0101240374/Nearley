@@ -28,9 +28,7 @@ const myTokens = [
 
 function getName(match) {
   for (let key in match.groups) {
-    //console.log(match.groups)
     if (typeof match.groups[key] !== 'undefined') {
-      //console.log(match.groups[key])
       return key;
     }
   }
@@ -49,7 +47,11 @@ function lex(program, regex) {
   while (match = regex.exec(program)) {
     if (typeof match !== 'undefined') {
       let type = getName(match);
-      let token = `{"type": "${type}", "value": '${match.groups[type]}', "offset": ${offset}}`;
+      if (type === 'ws') {
+        offset += match.groups[type].length;
+        continue;
+      }
+      let token = {type: type, value: match.groups[type], offset: offset };
       offset += match.groups[type].length;
       tokens.push(token);
     }
@@ -57,34 +59,94 @@ function lex(program, regex) {
   if (offset < program.length) {
     throw new TypeError('Error en ' + offset);
   }
-  console.log(tokens);
+  //console.log(tokens);
   return tokens;
 }
 
-function main() {
-  let regex = unifyRegexp(myTokens);
-  lex(`{
-    "glossary": {
-        "title": "example glossary",
-		"GlossDiv": {
-            "title": "S",
-			"GlossList": {
-                "GlossEntry": {
-                    "ID": "SGML",
-					"SortAs": "SGML",
-					"GlossTerm": "Standard Generalized Markup Language",
-					"Acronym": "SGML",
-					"Abbrev": "ISO 8879:1986",
-					"GlossDef": {
-                        "para": "A meta-markup language, used to create markup languages such as DocBook.",
-						"GlossSeeAlso": ["GML", "XML"]
-                    },
-					"GlossSee": "markup"
-                }
-            }
-        }
-    }
-}`, regex);
+function getLookahead(tokens) {
+  let lookahead = tokens[0];
+  tokens = tokens.shift();
+  //console.log(tokens)
+  return lookahead;
 }
 
-main();
+function parseS(tokens, lookahead) {
+  debugger;
+  lookahead = getLookahead(tokens);
+  if (lookahead.type === 'Lb') parseObject(tokens, lookahead);
+  if (lookahead.type === 'Lsqr') parseArray(tokens, lookahead);
+  
+  lookahead = getLookahead(tokens);
+  if (!lookahead) console.log('Todo en orden')
+  else throw new SyntaxError('Cagaste en S');
+}
+
+function parseObject(tokens, lookahead) {
+  //lookahead = getLookahead(tokens);
+  if (lookahead.type !== 'Lb') throw new SyntaxError('Cagaste en el lb de object');
+  lookahead = getLookahead(tokens);  
+  if (lookahead.type === 'Rb') return;
+
+  parseProperty(tokens, lookahead);
+  debugger;
+  lookahead = getLookahead(tokens);
+  if (lookahead.type === 'Rb') return;
+  while (lookahead.type === 'Comma') {
+    lookahead = getLookahead(tokens);
+    parseProperty(tokens, lookahead);
+    lookahead = getLookahead(tokens);
+  }
+  if (lookahead.type === 'Rb') return;
+  throw new SyntaxError('Falta bracket derecho')
+}
+
+function parseArray(tokens, lookahead) {
+  //lookahead = getLookahead(tokens);
+  if (lookahead.type !== 'Lsqr') throw new SyntaxError('Cagaste en el lb de object');
+  lookahead = getLookahead(tokens);
+  if (lookahead.type === 'Rsqr') return;
+
+  parseValue(tokens, lookahead);
+  lookahead = getLookahead(tokens);
+  if (lookahead.type === 'Rsqr') return;
+  while (lookahead.type === 'Comma') {
+    lookahead = getLookahead(tokens);
+    parseValue(tokens, lookahead);
+    lookahead = getLookahead(tokens);
+  }
+  if (lookahead.type === 'Rsqr') return;
+  throw new SyntaxError('Falta corchete derecho')
+}
+
+function parseProperty(tokens, lookahead) {
+  if (lookahead.type !== 'String') throw new SyntaxError('Cagaste blando en property string');
+  lookahead = getLookahead(tokens);
+  if (lookahead.type !== 'Colon') throw new SyntaxError('Cagaste en property colon');
+  lookahead = getLookahead(tokens);
+  parseValue(tokens, lookahead);
+}
+
+function parseValue(tokens, lookahead) {
+  if ((lookahead.type === 'Number')
+  | (lookahead.type === 'String')
+  | (lookahead.type === 'True')
+  | (lookahead.type === 'False')
+  | (lookahead.type === 'Null')) {
+    return;
+  }
+  
+  //lookahead = getLookahead(tokens);
+  debugger;
+  if (lookahead.type === 'Lsqr') { 
+    parseArray(tokens, lookahead);
+    return;
+  }
+  if (lookahead.type === 'Lb') {
+    parseObject(tokens, lookahead)
+    return;
+  };
+  
+  throw new SyntaxError('Error en value');
+}
+
+module.exports = {myTokens, unifyRegexp, lex, parseS};
